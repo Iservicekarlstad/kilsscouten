@@ -64,8 +64,7 @@ def build(out: Path = OUT, verbose: bool = True, standalone: bool = False) -> Pa
     us = reports[OUR_TEAM]
     our_sched = team_sched[OUR_TEAM]
 
-    upcoming = sorted([g for g in our_sched if not g.played and OUR_TEAM in (g.home, g.away)],
-                      key=lambda g: (g.date, g.time))[:3]
+    upcoming = data.upcoming_games(our_sched, OUR_TEAM)[:3]
 
     teams = {}
     for team, rep in reports.items():

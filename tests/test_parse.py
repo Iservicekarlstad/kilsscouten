@@ -56,6 +56,21 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(g.goals[0].strength, ["SH1"])
 
 
+class UpcomingTests(unittest.TestCase):
+    def test_next_game_skips_played_and_past_unreported(self):
+        import datetime
+        from scout.data import next_game
+        from scout.parse import GameRef
+        d = lambda n: (datetime.date.today() + datetime.timedelta(days=n)).isoformat()
+        games = [
+            GameRef(1, d(-3), "19:00", "Kils AIK", "A", 3, 1),   # spelad
+            GameRef(None, d(-1), "19:00", "B", "Kils AIK"),       # gammal utan resultat
+            GameRef(None, d(4), "16:00", "Kils AIK", "D"),
+            GameRef(None, d(2), "19:00", "C", "Kils AIK"),
+        ]
+        self.assertEqual(next_game(games, "Kils AIK").home, "C")
+
+
 class AnalyzeTests(unittest.TestCase):
     def test_vaxjo_single_game(self):
         r = analyze("Växjö Lakers HC", [_game()])

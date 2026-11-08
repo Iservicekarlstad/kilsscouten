@@ -5,12 +5,13 @@ import datetime
 import difflib
 import html
 import re
+from zoneinfo import ZoneInfo
 
 from .fetch import Fetcher
 from .parse import (Game, GameRef, League, parse_game, parse_leagues, parse_lineups,
                     parse_schedule)
 
-SIX_HOURS = 6 * 3600
+SCHEDULE_MAX_AGE = 3600  # spelschemat är en enda sida, hämta ofta så resultat syns direkt
 
 
 def leagues(f: Fetcher) -> list[League]:
@@ -35,7 +36,7 @@ def find_league(f: Fetcher, query: str) -> League:
 
 def league_title(f: Fetcher, league_id: int) -> str | None:
     """Fullständigt namn, t.ex. 'HockeyTvåan Herr Region Väst C', från spelschemats <title>."""
-    page = f.get(f"/ScheduleAndResults/Schedule/{league_id}", max_age=SIX_HOURS)
+    page = f.get(f"/ScheduleAndResults/Schedule/{league_id}", max_age=SCHEDULE_MAX_AGE)
     m = re.search(r"<title>(.*?)</title>", page, re.S)
     if not m:
         return None
@@ -45,7 +46,7 @@ def league_title(f: Fetcher, league_id: int) -> str | None:
 
 
 def schedule(f: Fetcher, league_id: int) -> list[GameRef]:
-    return parse_schedule(f.get(f"/ScheduleAndResults/Schedule/{league_id}", max_age=SIX_HOURS))
+    return parse_schedule(f.get(f"/ScheduleAndResults/Schedule/{league_id}", max_age=SCHEDULE_MAX_AGE))
 
 
 def teams(games: list[GameRef]) -> list[str]:
@@ -73,8 +74,16 @@ def recent_games(games: list[GameRef], team: str, n: int) -> list[GameRef]:
     return played[-n:]
 
 
+def upcoming_games(games: list[GameRef], team: str) -> list[GameRef]:
+    """Ospelade matcher från i dag och framåt (svensk tid). Äldre matcher utan
+    registrerat resultat hoppas över så att de inte fastnar som 'nästa match'."""
+    today = datetime.datetime.now(ZoneInfo("Europe/Stockholm")).date().isoformat()
+    up = [g for g in games if not g.played and team in (g.home, g.away) and g.date >= today]
+    return sorted(up, key=lambda g: (g.date, g.time))
+
+
 def next_game(games: list[GameRef], team: str) -> GameRef | None:
-    upcoming = [g for g in games if not g.played and team in (g.home, g.away)]
+    upcoming = upcoming_games(games, team)
     upcoming.sort(key=lambda g: (g.date, g.time))
     return upcoming[0] if upcoming else None
 
