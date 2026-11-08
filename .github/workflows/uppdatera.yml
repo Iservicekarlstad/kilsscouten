@@ -1,0 +1,53 @@
+name: Uppdatera scoutrapporter
+
+on:
+  schedule:
+    # GitHub kör i UTC: 06 och 22 UTC = 07 och 23 svensk vintertid (08 och 00 sommartid)
+    - cron: "0 6,22 * * *"
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths: ["scout/**", ".github/workflows/**"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: uppdatera
+  cancel-in-progress: false
+
+jobs:
+  bygg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Återanvänd hämtade protokoll
+        uses: actions/cache@v4
+        with:
+          path: .cache
+          key: swehockey-${{ github.run_id }}
+          restore-keys: swehockey-
+
+      - name: Tester
+        run: python -m unittest discover -s tests -t .
+
+      - name: Bygg sidan
+        run: python -m scout.site -q --netlify
+
+      - name: Spara och publicera
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/index.html
+          if git diff --cached --quiet; then
+            echo "Inga ändringar"
+            exit 0
+          fi
+          git commit -m "Uppdatera scoutrapporter $(TZ=Europe/Stockholm date '+%Y-%m-%d %H:%M')"
+          git push

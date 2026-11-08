@@ -1,0 +1,5 @@
+# Sidan byggs av GitHub Actions (se .github/workflows/uppdatera.yml).
+# Netlify publicerar bara den färdiga filen i public/.
+[build]
+  publish = "public"
+  command = "echo 'Ingen byggning, sidan är redan klar'"
