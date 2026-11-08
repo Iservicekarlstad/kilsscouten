@@ -46,3 +46,5 @@ Protokollen saknar tekningar och skott per spelare. Insikterna är regler med tr
 `python3 -m scout.site --netlify` bygger `public/index.html` med alla lag i HockeyTvåan Herr Region Väst C, sett från Kils AIK.
 GitHub Actions (`.github/workflows/uppdatera.yml`) kör det kl. 07 och 23 svensk tid och committar resultatet.
 Netlify är kopplat till repot och publicerar `public/` vid varje ny commit. Kör en uppdatering direkt under Actions → "Uppdatera scoutrapporter" → Run workflow.
+
+**Driftläge (2026-11-08):** repo `Iservicekarlstad/kil-scouting` (privat), live på https://kilsscouten.netlify.app (Netlify-projekt `kilsscouten`, Team Login avstängd). GitHub CLI finns i `~/.local/bin/gh`, inloggad som Iservicekarlstad.
