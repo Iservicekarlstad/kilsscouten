@@ -41,10 +41,10 @@ Tester: `python3 -m unittest discover -s tests -t .`
 
 Protokollen saknar tekningar och skott per spelare. Insikterna är regler med tröskelvärden och ingen jämförelse mot seriesnitt ännu.
 
-## Kils AIK-sidan (Netlify)
+## Kils AIK-sidan (GitHub Pages)
 
-`python3 -m scout.site --netlify` bygger `public/index.html` med alla lag i HockeyTvåan Herr Region Väst C, sett från Kils AIK.
-GitHub Actions (`.github/workflows/uppdatera.yml`) kör det kl. 07 och 23 svensk tid och committar resultatet.
-Netlify är kopplat till repot och publicerar `public/` vid varje ny commit. Kör en uppdatering direkt under Actions → "Uppdatera scoutrapporter" → Run workflow.
+`python3 -m scout.site --web` bygger `public/index.html` med alla lag i HockeyTvåan Herr Region Väst C, sett från Kils AIK.
+GitHub Actions (`.github/workflows/uppdatera.yml`) bygger och publicerar sidan till GitHub Pages varannan timme 06–24 svensk tid och vid varje push.
+Kör en uppdatering direkt under Actions → "Uppdatera scoutrapporter" → Run workflow.
 
-**Driftläge (2026-11-08):** repo `Iservicekarlstad/kil-scouting` (privat), live på https://kilsscouten.netlify.app (Netlify-projekt `kilsscouten`, Team Login avstängd). GitHub CLI finns i `~/.local/bin/gh`, inloggad som Iservicekarlstad.
+Live: https://iservicekarlstad.github.io/kilsscouten/

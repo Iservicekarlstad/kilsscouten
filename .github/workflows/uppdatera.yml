@@ -2,18 +2,20 @@ name: Uppdatera scoutrapporter
 
 on:
   schedule:
-    # GitHub kör i UTC: 06 och 22 UTC = 07 och 23 svensk vintertid (08 och 00 sommartid)
-    - cron: "0 6,22 * * *"
+    # Varannan timme 06–24 svensk tid. GitHub kör i UTC och kan försena schemalagda
+    # körningar, så täta körningar gör att nya resultat kommer ut snabbare.
+    - cron: "0 5-23/2 * * *"
   workflow_dispatch: {}
   push:
     branches: [main]
-    paths: ["scout/**", ".github/workflows/**"]
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: uppdatera
+  group: pages
   cancel-in-progress: false
 
 jobs:
@@ -38,16 +40,20 @@ jobs:
         run: python -m unittest discover -s tests -t .
 
       - name: Bygg sidan
-        run: python -m scout.site -q --netlify
+        run: python -m scout.site -q --web
 
-      - name: Spara och publicera
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/index.html
-          if git diff --cached --quiet; then
-            echo "Inga ändringar"
-            exit 0
-          fi
-          git commit -m "Uppdatera scoutrapporter $(TZ=Europe/Stockholm date '+%Y-%m-%d %H:%M')"
-          git push
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  publicera:
+    needs: bygg
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

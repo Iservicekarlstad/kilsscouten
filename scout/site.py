@@ -305,8 +305,8 @@ footer{color:var(--muted);font-size:12px;margin-top:20px}
 
 
 if __name__ == "__main__":
-    # python3 -m scout.site [-q] [--netlify]   (--netlify skriver public/index.html)
-    if "--netlify" in sys.argv:
+    # python3 -m scout.site [-q] [--web]   (--web skriver public/index.html för GitHub Pages)
+    if "--web" in sys.argv or "--netlify" in sys.argv:
         build(ROOT / "public" / "index.html", verbose="-q" not in sys.argv, standalone=True)
     else:
         build(verbose="-q" not in sys.argv)
